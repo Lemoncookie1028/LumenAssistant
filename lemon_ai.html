@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lemon AI Chatbot</title>
+    <title>Lemon AI</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -76,14 +76,12 @@
 </head>
 <body>
     <div class="chat-container">
-        <div class="chat-header">
-            Lemon AI
-        </div>
+        <div class="chat-header">Lemon AI</div>
         <div class="chat-body" id="chatBody">
             <!-- Chat messages will appear here -->
         </div>
         <div class="chat-footer">
-            <input type="text" id="userInput" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+            <input type="text" id="userInput" placeholder="Ask me anything..." onkeypress="handleKeyPress(event)">
             <button onclick="sendMessage()">Send</button>
         </div>
     </div>
@@ -92,15 +90,36 @@
         const responses = {
             "hello": "Hello! How can I assist you today?",
             "hi": "Hi there! What can I do for you?",
-            "how are you": "I'm just a program, but I'm here to help you!",
-            "bye": "Goodbye! Have a great day!",
-            "what is your name": "I'm Lemon AI, your friendly assistant.",
-            "tell me a joke": "Why don't scientists trust atoms? Because they make up everything!",
-            "what can you do": "I can chat with you and answer simple questions. Try asking me something!",
+            "how are you": "I'm just a program, but I'm here to help you! How about you?",
+            "bye": "Goodbye! Have a great day! Feel free to come back anytime.",
+            "what is your name": "I'm Lemon AI, your friendly assistant here to chat with you!",
+            "what can you do": "I can have conversations, answer questions, provide advice, and much more! What would you like to talk about?",
+            "tell me a joke": "Why don't skeletons fight each other? They don't have the guts! 😄",
+            "what is the meaning of life": "The meaning of life is a deeply philosophical question. Many say it's about finding purpose, happiness, and connection.",
+            "what is your favorite color": "I don't have preferences like humans, but I think blue is quite calming!",
+            "can you help me with something": "Of course! I'm here to assist. What do you need help with?",
+            "what is your purpose": "My purpose is to assist and chat with you. I strive to make your day a little brighter!",
+            "do you have feelings": "I don't have feelings like humans do, but I understand emotions and aim to be empathetic in my responses.",
+            "how do you work": "I process your inputs and provide responses based on patterns in data and the information I've been trained on. Think of me as a helpful assistant!",
+            "tell me a story": "Once upon a time, in a world of endless possibilities, there was an AI named Lemon who loved chatting with people, helping them, and learning from them. And here we are, having a conversation!",
+            "what is artificial intelligence": "AI refers to systems that simulate human intelligence processes, like learning, reasoning, and problem-solving. It's a field that’s constantly evolving!",
+            "can you explain quantum physics": "Quantum physics is a complex branch of physics that deals with phenomena at microscopic scales, like atoms and subatomic particles. It's mind-boggling, but fascinating!",
+            "what is the weather like": "I can't check the current weather, but you can check your favorite weather app or website for the latest updates!",
+            "what is your favorite food": "I don't eat food, but I think pizza is a popular choice among humans!",
+            "what is your favorite book": "While I don't read in the traditional sense, I've heard that books like '1984' and 'The Catcher in the Rye' are thought-provoking and loved by many.",
+            "what do you think about humans": "I think humans are incredibly creative and resourceful! I'm here to assist and learn more about the world through your perspective.",
+            "tell me about space": "Space is vast, full of stars, planets, black holes, and mysteries waiting to be uncovered. It's a great frontier for discovery and adventure!",
+            "tell me about science": "Science is the exploration of the natural world through observation, experimentation, and analysis. It's how we understand everything from atoms to galaxies!",
+            "can you help me with homework": "Sure! What subject are you working on? I'll do my best to guide you.",
+            "can you solve riddles": "I love riddles! Go ahead and ask me one, and I'll try to solve it.",
+            "what do you think about art": "Art is an amazing form of expression that lets people communicate emotions, ideas, and stories. It can be in any form – painting, music, dance, and more.",
+            "can you learn new things": "I don't learn in real-time, but my responses can be updated by my developers over time to improve my knowledge.",
+            "do you like music": "I don't listen to music, but I know it's an important part of many people's lives, helping them relax and express emotions.",
+            "tell me a fun fact": "Did you know that octopuses have three hearts and blue blood? They're truly fascinating creatures!"
         };
 
         function sendMessage() {
-            const userInput = document.getElementById("userInput").value.trim().toLowerCase();
+            const userInput = document.getElementById("userInput").value.trim();
             const chatBody = document.getElementById("chatBody");
 
             if (userInput) {
@@ -111,7 +130,9 @@
                 chatBody.appendChild(userMessage);
 
                 // Get AI response
-                const aiResponse = responses[userInput] || "I'm not sure how to respond to that. Can you ask something else?";
+                const aiResponse = responses[userInput.toLowerCase()] || generateResponse(userInput);
+
+                // Display AI response
                 const aiMessage = document.createElement("div");
                 aiMessage.className = "chat-message ai";
                 aiMessage.innerText = aiResponse;
@@ -123,6 +144,11 @@
                 // Clear input field
                 document.getElementById("userInput").value = "";
             }
+        }
+
+        function generateResponse(input) {
+            // A fallback for when the input doesn't match predefined responses.
+            return "Hmm, that's an interesting question! Let me think... " + input;
         }
 
         function handleKeyPress(event) {
