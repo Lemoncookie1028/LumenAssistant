@@ -54,7 +54,7 @@
 <div class="chat-container">
     <h2>🍋 Lemon AI - Wikipedia Assistant</h2>
     <div class="chat-box" id="chatBox">
-        <div class="bot">Hello! Ask me anything, and I'll fetch info from Wikipedia.</div>
+        <div class="bot">Hello! Ask me anything, and can fetch info from Wikipedia.</div>
     </div>
     <input type="text" id="userInput" placeholder="Type or speak your question...">
     <button onclick="sendMessage()">Send</button>
@@ -63,7 +63,8 @@
 
 <script>
     async function fetchWikipediaSummary(query) {
-        let apiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
+        let apiUrl = `https://api.allorigins.win/raw?url=https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
+
         try {
             let response = await fetch(apiUrl);
             let data = await response.json();
@@ -148,4 +149,3 @@
 
 </body>
 </html>
-
