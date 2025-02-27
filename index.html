@@ -3,90 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lemon AI</title>
+    <title>Lemon AI - Your Friendly Assistant</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            text-align: center;
+            background-color: #f9f2a2; /* Yellow background */
             margin: 0;
             padding: 0;
+            text-align: center;
         }
-        #container {
-            width: 90%;
-            max-width: 600px;
-            background: white;
-            margin: 50px auto;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
+        h1 {
+            color: #ffdb4d; /* Lemon Yellow */
+            margin-top: 20px;
         }
         #chatbox {
+            border: 1px solid #ffdb4d;
+            width: 80%;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 10px;
             height: 300px;
             overflow-y: auto;
-            border: 1px solid #ccc;
-            padding: 10px;
-            text-align: left;
-            background: #fff;
-            border-radius: 5px;
+            background-color: #fff;
         }
-        input, button, select {
-            width: calc(100% - 22px);
-            margin: 10px 0;
+        #userInput {
+            width: 80%;
+            max-width: 600px;
             padding: 10px;
-            border: 1px solid #ccc;
+            margin: 10px auto;
+            display: block;
+            font-size: 16px;
+            border: 1px solid #ffdb4d;
             border-radius: 5px;
         }
         button {
-            background-color: #28a745;
-            color: white;
+            padding: 10px 15px;
+            font-size: 16px;
             cursor: pointer;
+            display: block;
+            margin: 10px auto;
+            background-color: #ffdb4d;
+            border: none;
+            border-radius: 5px;
         }
         button:hover {
-            background-color: #218838;
+            background-color: #f7c200; /* Slightly darker yellow for hover effect */
+        }
+        .lemon {
+            width: 50px;
+            height: 50px;
+            margin: 10px;
+            background-color: #ffdb4d;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        #instructions {
+            background-color: #ffdb4d;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px auto;
+            width: 80%;
+            max-width: 600px;
+            color: #333;
         }
     </style>
 </head>
 <body>
+    <h1>Lemon AI - Your Friendly Assistant</h1>
 
-    <div id="container">
-        <h1>🍋 Lemon AI</h1>
-        <div id="chatbox"></div>
+    <div id="chatbox"></div>
 
-        <input type="text" id="userInput" placeholder="Type a message..." />
-        <button onclick="sendMessage()">Send</button>
+    <div id="instructions">
+        <h2>How to Use Wikipedia Feature:</h2>
+        <p>You can ask me to search Wikipedia for any topic!</p>
+        <p>Simply type: <strong>search Wikipedia for [your topic]</strong></p>
+        <p>For example, you can type:</p>
+        <pre>search Wikipedia for JavaScript</pre>
+    </div>
 
-        <label for="voiceSelect">🔊 Choose a voice:</label>
-        <select id="voiceSelect"></select>
+    <input type="text" id="userInput" placeholder="Ask me something..." />
+    <button onclick="sendMessage()">Send</button>
+
+    <div>
+        <div class="lemon"></div>
+        <div class="lemon"></div>
+        <div class="lemon"></div>
     </div>
 
     <script>
-        // Initialize Speech Synthesis
-        const synth = window.speechSynthesis;
-        let voices = [];
-
-        function loadVoices() {
-            voices = synth.getVoices();
-            const voiceSelect = document.getElementById("voiceSelect");
-            
-            voiceSelect.innerHTML = ""; // Clear previous options
-            voices.forEach((voice, index) => {
-                const option = document.createElement("option");
-                option.value = index;
-                option.textContent = `${voice.name} (${voice.lang})`;
-                voiceSelect.appendChild(option);
-            });
+        async function searchWikipedia(query) {
+            try {
+                let response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
+                let data = await response.json();
+                if (data.extract) {
+                    return data.extract;
+                } else {
+                    return "I couldn't find anything on Wikipedia.";
+                }
+            } catch (error) {
+                return "Sorry, I had trouble getting information from Wikipedia.";
+            }
         }
-
-        function speak(text) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            const selectedVoiceIndex = document.getElementById("voiceSelect").value;
-            if (voices.length > 0) utterance.voice = voices[selectedVoiceIndex];
-            synth.speak(utterance);
-        }
-
-        if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
-        window.onload = loadVoices;
 
         const responses = {
             "hello": ["Hello! How can I assist you?", "Hi there!", "Hey!"],
@@ -100,34 +117,41 @@
             "name": ["I'm Lemon AI, your assistant.", "You can call me Lemon AI!"]
         };
 
-        function getAIResponse(userInput) {
+        async function getAIResponse(userInput) {
             let input = userInput.toLowerCase();
+            
+            // Check if the user wants Wikipedia info
+            if (input.startsWith("search wikipedia for")) {
+                let query = input.replace("search wikipedia for", "").trim();
+                let wikiResponse = await searchWikipedia(query);
+                return wikiResponse;
+            }
+
+            // Check if it's a pre-defined response
             for (let key in responses) {
                 if (input.includes(key)) {
                     let response = responses[key][Math.floor(Math.random() * responses[key].length)];
-                    speak(response);
                     return response;
                 }
             }
+
             let defaultResponse = "I'm not sure how to respond to that.";
-            speak(defaultResponse);
             return defaultResponse;
         }
 
-        function sendMessage() {
+        async function sendMessage() {
             let userInput = document.getElementById("userInput").value.trim();
             if (userInput === "") return;
 
             let chatbox = document.getElementById("chatbox");
             chatbox.innerHTML += `<p><strong>You:</strong> ${userInput}</p>`;
 
-            let botResponse = getAIResponse(userInput);
+            let botResponse = await getAIResponse(userInput);
             chatbox.innerHTML += `<p><strong>Lemon AI:</strong> ${botResponse}</p>`;
 
             document.getElementById("userInput").value = "";
             chatbox.scrollTop = chatbox.scrollHeight;
         }
     </script>
-
 </body>
 </html>
