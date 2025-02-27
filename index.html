@@ -3,149 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lemon AI - Wikipedia Assistant</title>
+    <title>Lemon AI</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
             background-color: #f4f4f4;
-            padding: 20px;
+            text-align: center;
+            margin: 0;
+            padding: 0;
         }
-        .chat-container {
-            max-width: 400px;
-            margin: 20px auto;
+        #container {
+            width: 90%;
+            max-width: 600px;
             background: white;
+            margin: 50px auto;
             padding: 20px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
         }
-        .chat-box {
+        #chatbox {
             height: 300px;
             overflow-y: auto;
             border: 1px solid #ccc;
             padding: 10px;
-            background: #fff;
             text-align: left;
-        }
-        .user, .bot {
-            padding: 8px;
-            margin: 5px;
+            background: #fff;
             border-radius: 5px;
         }
-        .user { background: #d1e7ff; text-align: right; }
-        .bot { background: #e6e6e6; }
-        input, button {
+        input, button, select {
+            width: calc(100% - 22px);
+            margin: 10px 0;
             padding: 10px;
-            margin: 10px;
-            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
         button {
-            cursor: pointer;
-            background: #28a745;
+            background-color: #28a745;
             color: white;
-            border: none;
-            border-radius: 5px;
+            cursor: pointer;
         }
-        button:active { background: #218838; }
+        button:hover {
+            background-color: #218838;
+        }
     </style>
 </head>
 <body>
 
-<div class="chat-container">
-    <h2>🍋 Lemon AI - Wikipedia Assistant</h2>
-    <div class="chat-box" id="chatBox">
-        <div class="bot">Hello! Ask me anything, and can fetch info from Wikipedia.</div>
+    <div id="container">
+        <h1>🍋 Lemon AI</h1>
+        <div id="chatbox"></div>
+
+        <input type="text" id="userInput" placeholder="Type a message..." />
+        <button onclick="sendMessage()">Send</button>
+
+        <label for="voiceSelect">🔊 Choose a voice:</label>
+        <select id="voiceSelect"></select>
     </div>
-    <input type="text" id="userInput" placeholder="Type or speak your question...">
-    <button onclick="sendMessage()">Send</button>
-    <button onclick="startListening()">🎤 Speak</button>
-</div>
 
-<script>
-    async function fetchWikipediaSummary(query) {
-        let apiUrl = `https://api.allorigins.win/raw?url=https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
+    <script>
+        // Initialize Speech Synthesis
+        const synth = window.speechSynthesis;
+        let voices = [];
 
-        try {
-            let response = await fetch(apiUrl);
-            let data = await response.json();
-            return data.extract || "I couldn't find information on that.";
-        } catch (error) {
-            return "Sorry, I couldn't connect to Wikipedia.";
-        }
-    }
-
-    async function getResponse(userMessage) {
-        userMessage = userMessage.toLowerCase();
-        
-        if (userMessage.startsWith("tell me about") || userMessage.startsWith("who is") || userMessage.startsWith("what is")) {
-            let searchTerm = userMessage.replace("tell me about ", "").replace("who is ", "").replace("what is ", "");
-            let summary = await fetchWikipediaSummary(searchTerm);
-            return summary;
+        function loadVoices() {
+            voices = synth.getVoices();
+            const voiceSelect = document.getElementById("voiceSelect");
+            
+            voiceSelect.innerHTML = ""; // Clear previous options
+            voices.forEach((voice, index) => {
+                const option = document.createElement("option");
+                option.value = index;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                voiceSelect.appendChild(option);
+            });
         }
 
-        let responses = {
-            "hello": ["Hello! How can I assist you today?", "Hi there! Need help?"],
-            "how are you": ["I'm just a program, but I'm here to help!"],
-            "bye": ["Goodbye! Have a great day!"],
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            const selectedVoiceIndex = document.getElementById("voiceSelect").value;
+            if (voices.length > 0) utterance.voice = voices[selectedVoiceIndex];
+            synth.speak(utterance);
+        }
+
+        if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
+        window.onload = loadVoices;
+
+        const responses = {
+            "hello": ["Hello! How can I assist you?", "Hi there!", "Hey!"],
+            "how are you": ["I'm doing great! How about you?", "I'm here to help!"],
             "tell me a joke": [
                 "Why did the math book look sad? Because it had too many problems!",
-                "Why don’t skeletons fight? They don’t have the guts!"
+                "What do you call cheese that isn’t yours? Nacho cheese!"
             ],
-            "default": ["I'm not sure how to respond. Try asking me something else!"]
+            "bye": ["Goodbye! Have a great day!", "See you later!"],
+            "weather": ["I can't check the weather, but you can look outside or use a weather app!"],
+            "name": ["I'm Lemon AI, your assistant.", "You can call me Lemon AI!"]
         };
 
-        let possibleResponses = responses[userMessage] || responses["default"];
-        return possibleResponses[Math.floor(Math.random() * possibleResponses.length)];
-    }
+        function getAIResponse(userInput) {
+            let input = userInput.toLowerCase();
+            for (let key in responses) {
+                if (input.includes(key)) {
+                    let response = responses[key][Math.floor(Math.random() * responses[key].length)];
+                    speak(response);
+                    return response;
+                }
+            }
+            let defaultResponse = "I'm not sure how to respond to that.";
+            speak(defaultResponse);
+            return defaultResponse;
+        }
 
-    function sendMessage() {
-        let inputField = document.getElementById("userInput");
-        let chatBox = document.getElementById("chatBox");
-        let userMessage = inputField.value.trim();
+        function sendMessage() {
+            let userInput = document.getElementById("userInput").value.trim();
+            if (userInput === "") return;
 
-        if (userMessage === "") return;
+            let chatbox = document.getElementById("chatbox");
+            chatbox.innerHTML += `<p><strong>You:</strong> ${userInput}</p>`;
 
-        displayMessage("You: " + userMessage, "user");
-        
-        getResponse(userMessage).then(botResponse => {
-            speakAndDisplay(botResponse);
-        });
+            let botResponse = getAIResponse(userInput);
+            chatbox.innerHTML += `<p><strong>Lemon AI:</strong> ${botResponse}</p>`;
 
-        inputField.value = "";
-    }
-
-    function displayMessage(text, className) {
-        let chatBox = document.getElementById("chatBox");
-        let messageDiv = document.createElement("div");
-        messageDiv.className = className;
-        messageDiv.textContent = text;
-        chatBox.appendChild(messageDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    function speakAndDisplay(text) {
-        displayMessage("Lemon AI: " + text, "bot");
-        let utterance = new SpeechSynthesisUtterance(text);
-        utterance.voice = speechSynthesis.getVoices()[0]; 
-        speechSynthesis.speak(utterance);
-    }
-
-    function startListening() {
-        let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.lang = "en-US";
-        recognition.start();
-
-        recognition.onresult = function(event) {
-            let spokenText = event.results[0][0].transcript;
-            document.getElementById("userInput").value = spokenText;
-            sendMessage();
-        };
-
-        recognition.onerror = function(event) {
-            console.log("Speech recognition error:", event.error);
-        };
-    }
-</script>
+            document.getElementById("userInput").value = "";
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+    </script>
 
 </body>
 </html>
