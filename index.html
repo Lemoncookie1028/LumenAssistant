@@ -74,11 +74,11 @@
     <div id="chatbox"></div>
 
     <div id="instructions">
-        <h2>How to Use Wikipedia Feature:</h2>
-        <p>You can ask me to search Wikipedia for any topic!</p>
-        <p>Simply type: <strong>search Wikipedia for [your topic]</strong></p>
+        <h2>How to Use Lemon AI:</h2>
+        <p>Just type any question or topic, and I'll try to answer it!</p>
+        <p>If I don’t know the answer, I'll look it up on Wikipedia for you.</p>
         <p>For example, you can type:</p>
-        <pre>search Wikipedia for JavaScript</pre>
+        <pre>What is JavaScript?</pre>
     </div>
 
     <input type="text" id="userInput" placeholder="Ask me something..." />
@@ -118,16 +118,9 @@
         };
 
         async function getAIResponse(userInput) {
-            let input = userInput.toLowerCase();
-            
-            // Check if the user wants Wikipedia info
-            if (input.startsWith("search wikipedia for")) {
-                let query = input.replace("search wikipedia for", "").trim();
-                let wikiResponse = await searchWikipedia(query);
-                return wikiResponse;
-            }
+            let input = userInput.toLowerCase().trim();
 
-            // Check if it's a pre-defined response
+            // Check if it's a predefined response
             for (let key in responses) {
                 if (input.includes(key)) {
                     let response = responses[key][Math.floor(Math.random() * responses[key].length)];
@@ -135,8 +128,9 @@
                 }
             }
 
-            let defaultResponse = "I'm not sure how to respond to that.";
-            return defaultResponse;
+            // If no predefined response, search Wikipedia
+            let wikiResponse = await searchWikipedia(userInput);
+            return wikiResponse;
         }
 
         async function sendMessage() {
