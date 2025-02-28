@@ -3,149 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lemon AI - Your Friendly Assistant</title>
+    <title>Lemon AI - Wikipedia Assistant</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f9f2a2; /* Yellow background */
-            margin: 0;
-            padding: 0;
             text-align: center;
+            background-color: #f9f2a2; /* Light yellow */
+            margin: 0;
+            padding: 20px;
         }
-        h1 {
-            color: #ffdb4d; /* Lemon Yellow */
-            margin-top: 20px;
-        }
-        #chatbox {
-            border: 1px solid #ffdb4d;
-            width: 80%;
-            max-width: 600px;
+        .chat-container {
+            max-width: 400px;
             margin: 20px auto;
-            padding: 10px;
+            background: white;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        .chat-box {
             height: 300px;
             overflow-y: auto;
-            background-color: #fff;
-        }
-        #userInput {
-            width: 80%;
-            max-width: 600px;
-            padding: 10px;
-            margin: 10px auto;
-            display: block;
-            font-size: 16px;
             border: 1px solid #ffdb4d;
+            padding: 10px;
+            background: #fff;
+            text-align: left;
+        }
+        .user, .bot {
+            padding: 8px;
+            margin: 5px;
             border-radius: 5px;
         }
-        button {
-            padding: 10px 15px;
+        .user { background: #d1e7ff; text-align: right; }
+        .bot { background: #e6e6e6; }
+        input, button {
+            padding: 10px;
+            margin: 10px;
             font-size: 16px;
+        }
+        button {
             cursor: pointer;
-            display: block;
-            margin: 10px auto;
-            background-color: #ffdb4d;
+            background: #ffdb4d;
+            color: black;
             border: none;
             border-radius: 5px;
         }
-        button:hover {
-            background-color: #f7c200; /* Slightly darker yellow for hover effect */
-        }
-        .lemon {
-            width: 50px;
-            height: 50px;
-            margin: 10px;
-            background-color: #ffdb4d;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        #instructions {
-            background-color: #ffdb4d;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px auto;
-            width: 80%;
-            max-width: 600px;
-            color: #333;
-        }
+        button:hover { background: #f7c200; }
     </style>
 </head>
 <body>
-    <h1>Lemon AI - Your Friendly Assistant</h1>
 
-    <div id="chatbox"></div>
-
-    <div id="instructions">
-        <h2>How to Use Lemon AI:</h2>
-        <p>Just type any question or topic, and I'll try to answer it!</p>
-        <p>If I don’t know the answer, I'll look it up on Wikipedia for you.</p>
-        <p>For example, you can type:</p>
-        <pre>What is JavaScript?</pre>
+<div class="chat-container">
+    <h2>🍋 Lemon AI - Wikipedia Assistant</h2>
+    <div class="chat-box" id="chatBox">
+        <div class="bot">Hello! I'm Lemon AI. I can search wikipedia by just saying a topic</div>
     </div>
-
-    <input type="text" id="userInput" placeholder="Ask me something..." />
+    <input type="text" id="userInput" placeholder="Ask me something...">
     <button onclick="sendMessage()">Send</button>
+</div>
 
-    <div>
-        <div class="lemon"></div>
-        <div class="lemon"></div>
-        <div class="lemon"></div>
-    </div>
-
-    <script>
-        async function searchWikipedia(query) {
-            try {
-                let response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
-                let data = await response.json();
-                if (data.extract) {
-                    return data.extract;
-                } else {
-                    return "I couldn't find anything on Wikipedia.";
-                }
-            } catch (error) {
-                return "Sorry, I had trouble getting information from Wikipedia.";
+<script>
+    async function searchWikipedia(query) {
+        try {
+            let response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
+            let data = await response.json();
+            if (data.extract) {
+                return data.extract;
+            } else {
+                return "I couldn't find anything on Wikipedia.";
             }
+        } catch (error) {
+            return "Sorry, I had trouble getting information from Wikipedia.";
         }
+    }
 
-        const responses = {
-            "hello": ["Hello! How can I assist you?", "Hi there!", "Hey!"],
-            "how are you": ["I'm doing great! How about you?", "I'm here to help!"],
-            "tell me a joke": [
-                "Why did the math book look sad? Because it had too many problems!",
-                "What do you call cheese that isn’t yours? Nacho cheese!"
-            ],
-            "bye": ["Goodbye! Have a great day!", "See you later!"],
-            "weather": ["I can't check the weather, but you can look outside or use a weather app!"],
-            "name": ["I'm Lemon AI, your assistant.", "You can call me Lemon AI!"]
-        };
+    async function getAIResponse(userInput) {
+        let input = userInput.toLowerCase().trim();
+        return await searchWikipedia(input);
+    }
 
-        async function getAIResponse(userInput) {
-            let input = userInput.toLowerCase().trim();
+    async function sendMessage() {
+        let userInput = document.getElementById("userInput").value.trim();
+        if (userInput === "") return;
 
-            // Check if it's a predefined response
-            for (let key in responses) {
-                if (input.includes(key)) {
-                    let response = responses[key][Math.floor(Math.random() * responses[key].length)];
-                    return response;
-                }
-            }
+        let chatBox = document.getElementById("chatBox");
+        chatBox.innerHTML += `<p class='user'><strong>You:</strong> ${userInput}</p>`;
 
-            // If no predefined response, search Wikipedia
-            let wikiResponse = await searchWikipedia(userInput);
-            return wikiResponse;
-        }
+        let botResponse = await getAIResponse(userInput);
+        chatBox.innerHTML += `<p class='bot'><strong>Lemon AI:</strong> ${botResponse}</p>`;
 
-        async function sendMessage() {
-            let userInput = document.getElementById("userInput").value.trim();
-            if (userInput === "") return;
+        document.getElementById("userInput").value = "";
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+</script>
 
-            let chatbox = document.getElementById("chatbox");
-            chatbox.innerHTML += `<p><strong>You:</strong> ${userInput}</p>`;
-
-            let botResponse = await getAIResponse(userInput);
-            chatbox.innerHTML += `<p><strong>Lemon AI:</strong> ${botResponse}</p>`;
-
-            document.getElementById("userInput").value = "";
-            chatbox.scrollTop = chatbox.scrollHeight;
-        }
-    </script>
 </body>
 </html>
