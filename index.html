@@ -66,10 +66,8 @@
     <button onclick="sendMessage()">Send</button>
     <div class="instructions">
         <h3>How to Use Lemon AI</h3>
-        <p>Type a math problem, and I'll solve it!</p>
-        <p>Example: <b>12 / 4</b></p>
-        <p>Type any topic to search Wikipedia.</p>
-        <p>Example: <b>Albert Einstein</b></p>
+        <p>For Wikipedia search, type a topic like: <b>JavaScript</b></p>
+        <p>For math, enter an expression like: <b>add 5 and 7</b> or <b>divide 20 by 4</b></p>
     </div>
 </div>
 
@@ -78,29 +76,43 @@
         try {
             let response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
             let data = await response.json();
-            
             if (data.extract) {
                 return `${data.extract} <br><a href='${data.content_urls.desktop.page}' target='_blank'>Read more on Wikipedia</a>`;
             } else {
-                return "I couldn't find anything on Wikipedia. Try rephrasing your query.";
+                return "I couldn't find anything on Wikipedia.";
             }
         } catch (error) {
             return "Sorry, I had trouble getting information from Wikipedia.";
         }
     }
 
+    function parseMathExpression(expression) {
+        expression = expression.replace(/add/gi, '+')
+                               .replace(/plus/gi, '+')
+                               .replace(/subtract/gi, '-')
+                               .replace(/minus/gi, '-')
+                               .replace(/multiply/gi, '*')
+                               .replace(/times/gi, '*')
+                               .replace(/divide/gi, '/')
+                               .replace(/by /gi, '');
+        return expression;
+    }
+
     function calculateMath(expression) {
         try {
-            let sanitizedExpression = expression.replace(/[^0-9+\-*/().]/g, '');
-            let result = eval(sanitizedExpression);
+            expression = parseMathExpression(expression);
+            if (/[^0-9+\-*/(). ]/.test(expression)) {
+                return "Invalid math expression.";
+            }
+            let result = Function(`'use strict'; return (${expression})`)();
             return `The answer is: ${result}`;
         } catch {
-            return "I couldn't calculate that. Try a simple operation like '8 * 3'.";
+            return "I couldn't calculate that. Try something like 'add 5 and 7'.";
         }
     }
 
-    async function processInput(userMessage) {
-        if (/^[0-9+\-*/(). ]+$/.test(userMessage)) {
+    async function getResponse(userMessage) {
+        if (/add|plus|subtract|minus|multiply|times|divide|\d/.test(userMessage.toLowerCase())) {
             return calculateMath(userMessage);
         }
         return await searchWikipedia(userMessage);
@@ -115,7 +127,7 @@
 
         chatBox.innerHTML += `<div class='user'>You: ${userMessage}</div>`;
 
-        let botResponse = await processInput(userMessage);
+        let botResponse = await getResponse(userMessage);
         chatBox.innerHTML += `<div class='bot'>Lemon AI: ${botResponse}</div>`;
 
         inputField.value = "";
