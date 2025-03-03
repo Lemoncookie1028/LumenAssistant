@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lemon AI - Wikipedida School subject helper</title>
+    <title>Lemon AI - Wikipedia & Math Helper</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -58,16 +58,18 @@
 <body>
 
 <div class="chat-container">
-    <h2>🍋 Lemon AI - Wikipedida School subject helper🍋</h2>
+    <h2>🍋 Lemon AI - Wikipedia & Math Helper 🍋</h2>
     <div class="chat-box" id="chatBox">
         <div class="bot">Hello! I'm Lemon AI. How can I assist you?</div>
     </div>
     <input type="text" id="userInput" placeholder="Ask me something...">
     <button onclick="sendMessage()">Send</button>
     <div class="instructions">
-        <h3>How to Use Wikipedia Search</h3>
-        <p>Just type any topic, and I'll look it up on Wikipedia for you!</p>
-        <p>Example: <b>JavaScript</b></p>
+        <h3>How to Use Lemon AI</h3>
+        <p>Type a math problem, and I'll solve it!</p>
+        <p>Example: <b>12 / 4</b></p>
+        <p>Type any topic to search Wikipedia.</p>
+        <p>Example: <b>Albert Einstein</b></p>
     </div>
 </div>
 
@@ -76,14 +78,32 @@
         try {
             let response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
             let data = await response.json();
+            
             if (data.extract) {
                 return `${data.extract} <br><a href='${data.content_urls.desktop.page}' target='_blank'>Read more on Wikipedia</a>`;
             } else {
-                return "I couldn't find anything on Wikipedia.";
+                return "I couldn't find anything on Wikipedia. Try rephrasing your query.";
             }
         } catch (error) {
             return "Sorry, I had trouble getting information from Wikipedia.";
         }
+    }
+
+    function calculateMath(expression) {
+        try {
+            let sanitizedExpression = expression.replace(/[^0-9+\-*/().]/g, '');
+            let result = eval(sanitizedExpression);
+            return `The answer is: ${result}`;
+        } catch {
+            return "I couldn't calculate that. Try a simple operation like '8 * 3'.";
+        }
+    }
+
+    async function processInput(userMessage) {
+        if (/^[0-9+\-*/(). ]+$/.test(userMessage)) {
+            return calculateMath(userMessage);
+        }
+        return await searchWikipedia(userMessage);
     }
 
     async function sendMessage() {
@@ -95,7 +115,7 @@
 
         chatBox.innerHTML += `<div class='user'>You: ${userMessage}</div>`;
 
-        let botResponse = await searchWikipedia(userMessage);
+        let botResponse = await processInput(userMessage);
         chatBox.innerHTML += `<div class='bot'>Lemon AI: ${botResponse}</div>`;
 
         inputField.value = "";
