@@ -110,16 +110,29 @@
         if (userMessage === "") return;
 
         chatBox.innerHTML += `<div class='user'>You: ${userMessage}</div>`;
-
-        let botResponse = calculateMath(userMessage);
+        let botResponse = "";
+        
+        if (userMessage.toLowerCase().startsWith("wikipedia ")) {
+            let topic = userMessage.substring(10);
+            window.open(`https://en.wikipedia.org/wiki/${encodeURIComponent(topic)}`, '_blank');
+            botResponse = `Searching Wikipedia for '${topic}'...`;
+        } else if (userMessage.toLowerCase().startsWith("search ")) {
+            let query = userMessage.substring(7);
+            window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+            botResponse = `Searching Google for '${query}'...`;
+        } else {
+            botResponse = calculateMath(userMessage);
+        }
+        
         chatBox.innerHTML += `<div class='bot'>Lemon AI: ${botResponse}</div>`;
-
         inputField.value = "";
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 </script>
+
 <footer>
-        <p>&copy; 2025 RuinWeb. All rights reserved.</p>
-    </footer>
+    <p>&copy; 2025 RuinWeb. All rights reserved.</p>
+</footer>
+
 </body>
 </html>
