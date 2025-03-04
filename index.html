@@ -102,6 +102,24 @@
         }
     }
 
+    async function searchWikipedia(query) {
+        try {
+            let response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
+            let data = await response.json();
+            if (data.extract) {
+                return `${data.extract} <br><a href="${data.content_urls.desktop.page}" target="_blank">Read more on Wikipedia</a>`;
+            } else {
+                return "I couldn't find anything on Wikipedia for that topic.";
+            }
+        } catch {
+            return "Error searching Wikipedia.";
+        }
+    }
+
+    function searchGoogle(query) {
+        return `Click here to search on Google: <a href="https://www.google.com/search?q=${encodeURIComponent(query)}" target="_blank">Google Search</a>`;
+    }
+
     async function sendMessage() {
         let inputField = document.getElementById("userInput");
         let chatBox = document.getElementById("chatBox");
@@ -110,29 +128,26 @@
         if (userMessage === "") return;
 
         chatBox.innerHTML += `<div class='user'>You: ${userMessage}</div>`;
+
         let botResponse = "";
-        
+
         if (userMessage.toLowerCase().startsWith("wikipedia ")) {
-            let topic = userMessage.substring(10);
-            window.open(`https://en.wikipedia.org/wiki/${encodeURIComponent(topic)}`, '_blank');
-            botResponse = `Searching Wikipedia for '${topic}'...`;
+            let query = userMessage.substring(10).trim();
+            botResponse = await searchWikipedia(query);
         } else if (userMessage.toLowerCase().startsWith("search ")) {
-            let query = userMessage.substring(7);
-            window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
-            botResponse = `Searching Google for '${query}'...`;
+            let query = userMessage.substring(7).trim();
+            botResponse = searchGoogle(query);
         } else {
             botResponse = calculateMath(userMessage);
         }
-        
+
         chatBox.innerHTML += `<div class='bot'>Lemon AI: ${botResponse}</div>`;
         inputField.value = "";
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 </script>
-
 <footer>
     <p>&copy; 2025 RuinWeb. All rights reserved.</p>
 </footer>
-
 </body>
 </html>
