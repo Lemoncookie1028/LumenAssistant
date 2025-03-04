@@ -70,7 +70,7 @@
     <div class="instructions" id="instructions">
         <h3>How to Use Lemon AI</h3>
         <p>For Wikipedia search, type: <b>wikipedia [your topic]</b></p>
-        <p>For math, enter an expression like: <b>5+7*3</b></p>
+        <p>For math, enter an expression like: <b>5+7*3</b> or words like <b>five plus three</b></p>
         <p>For Google search, type: <b>search [your query]</b></p>
     </div>
 </div>
@@ -79,6 +79,43 @@
     function toggleInstructions() {
         let instructions = document.getElementById("instructions");
         instructions.style.display = instructions.style.display === "none" ? "block" : "none";
+    }
+
+    function wordToNumber(str) {
+        const wordsToNumbers = {
+            'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9,
+            'plus': '+', 'minus': '-', 'times': '*', 'multiplied by': '*', 'divided by': '/', 'over': '/'
+        };
+        return str.split(" ").map(word => wordsToNumbers[word.toLowerCase()] || word).join(" ");
+    }
+
+    function calculateMath(expression) {
+        try {
+            expression = wordToNumber(expression);
+            if (/[^0-9+\-*/(). ]/.test(expression)) {
+                return "Invalid math expression.";
+            }
+            let result = Function(`'use strict'; return (${expression})`)();
+            return `The answer is: ${result}`;
+        } catch {
+            return "I couldn't calculate that. Try something simple like 'five plus three'.";
+        }
+    }
+
+    async function sendMessage() {
+        let inputField = document.getElementById("userInput");
+        let chatBox = document.getElementById("chatBox");
+        let userMessage = inputField.value.trim();
+
+        if (userMessage === "") return;
+
+        chatBox.innerHTML += `<div class='user'>You: ${userMessage}</div>`;
+
+        let botResponse = calculateMath(userMessage);
+        chatBox.innerHTML += `<div class='bot'>Lemon AI: ${botResponse}</div>`;
+
+        inputField.value = "";
+        chatBox.scrollTop = chatBox.scrollHeight;
     }
 </script>
 
