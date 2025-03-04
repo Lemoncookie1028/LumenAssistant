@@ -70,8 +70,12 @@
     <div class="instructions" id="instructions">
         <h3>How to Use Lemon AI</h3>
         <p>For Wikipedia search, type: <b>wikipedia [your topic]</b></p>
-        <p>For math, enter an expression like: <b>5+7*3</b> or words like <b>five plus three</b></p>
         <p>For Google search, type: <b>search [your query]</b></p>
+        <p>For math, enter an expression like: <b>5+7*3</b> or words like <b>five plus three</b></p>
+        <p>For weather, type: <b>weather [city]</b></p>
+        <p>For unit conversion, type: <b>convert [value] [unit] to [unit]</b></p>
+        <p>For dictionary, type: <b>define [word]</b></p>
+        <p>For jokes, type: <b>tell me a joke</b></p>
     </div>
 </div>
 
@@ -81,43 +85,42 @@
         instructions.style.display = instructions.style.display === "none" ? "block" : "none";
     }
 
-    function wordToNumber(str) {
-        const wordsToNumbers = {
-            'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9,
-            'plus': '+', 'minus': '-', 'times': '*', 'multiplied by': '*', 'divided by': '/', 'over': '/'
-        };
-        return str.split(" ").map(word => wordsToNumbers[word.toLowerCase()] || word).join(" ");
+    async function fetchWikipedia(query) {
+        let response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${query}`);
+        let data = await response.json();
+        return data.extract ? `${data.title}: ${data.extract}` : "No Wikipedia article found.";
+    }
+
+    function performGoogleSearch(query) {
+        window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+        return "Opening Google search...";
     }
 
     function calculateMath(expression) {
         try {
-            expression = wordToNumber(expression);
-            if (/[^0-9+\-*/(). ]/.test(expression)) {
-                return "Invalid math expression.";
-            }
             let result = Function(`'use strict'; return (${expression})`)();
             return `The answer is: ${result}`;
         } catch {
-            return "I couldn't calculate that. Try something simple like 'five plus three'.";
+            return "I couldn't calculate that. Try something simple like '5 + 3'.";
         }
     }
 
-    async function searchWikipedia(query) {
-        try {
-            let response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
-            let data = await response.json();
-            if (data.extract) {
-                return `${data.extract} <br><a href="${data.content_urls.desktop.page}" target="_blank">Read more on Wikipedia</a>`;
-            } else {
-                return "I couldn't find anything on Wikipedia for that topic.";
-            }
-        } catch {
-            return "Error searching Wikipedia.";
-        }
+    async function fetchWeather(city) {
+        let response = await fetch(`https://wttr.in/${city}?format=%C+%t`);
+        let data = await response.text();
+        return `Weather in ${city}: ${data}`;
     }
 
-    function searchGoogle(query) {
-        return `Click here to search on Google: <a href="https://www.google.com/search?q=${encodeURIComponent(query)}" target="_blank">Google Search</a>`;
+    async function fetchDefinition(word) {
+        let response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+        let data = await response.json();
+        return data[0]?.meanings[0]?.definitions[0]?.definition || "No definition found.";
+    }
+
+    async function fetchJoke() {
+        let response = await fetch("https://official-joke-api.appspot.com/random_joke");
+        let data = await response.json();
+        return `${data.setup} - ${data.punchline}`;
     }
 
     async function sendMessage() {
@@ -128,17 +131,20 @@
         if (userMessage === "") return;
 
         chatBox.innerHTML += `<div class='user'>You: ${userMessage}</div>`;
-
-        let botResponse = "";
+        let botResponse = "I didn't understand that.";
 
         if (userMessage.toLowerCase().startsWith("wikipedia ")) {
-            let query = userMessage.substring(10).trim();
-            botResponse = await searchWikipedia(query);
+            botResponse = await fetchWikipedia(userMessage.substring(10));
         } else if (userMessage.toLowerCase().startsWith("search ")) {
-            let query = userMessage.substring(7).trim();
-            botResponse = searchGoogle(query);
-        } else {
+            botResponse = performGoogleSearch(userMessage.substring(7));
+        } else if (/^[0-9+\-*/(). ]+$/.test(userMessage)) {
             botResponse = calculateMath(userMessage);
+        } else if (userMessage.toLowerCase().startsWith("weather ")) {
+            botResponse = await fetchWeather(userMessage.substring(8));
+        } else if (userMessage.toLowerCase().startsWith("define ")) {
+            botResponse = await fetchDefinition(userMessage.substring(7));
+        } else if (userMessage.toLowerCase().startsWith("tell me a joke")) {
+            botResponse = await fetchJoke();
         }
 
         chatBox.innerHTML += `<div class='bot'>Lemon AI: ${botResponse}</div>`;
@@ -146,6 +152,7 @@
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 </script>
+
 <footer>
     <p>&copy; 2025 RuinWeb. All rights reserved.</p>
 </footer>
