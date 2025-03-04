@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lemon AI - school & research Helper</title>
+    <title>Lemon AI - School & Research Helper</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -45,6 +45,7 @@
             background: #fbe385;
             border: none;
             border-radius: 5px;
+            transition: 0.3s;
         }
         button:hover { background: #f9dd72; }
         .instructions {
@@ -52,19 +53,21 @@
             padding: 10px;
             margin: 10px;
             border-radius: 5px;
+            display: none;
         }
     </style>
 </head>
 <body>
 
 <div class="chat-container">
-    <h2>🍋 Lemon AI - School & research Helper 🍋</h2>
+    <h2>🍋 Lemon AI - School & Research Helper 🍋</h2>
     <div class="chat-box" id="chatBox">
         <div class="bot">Hello! I'm Lemon AI. I can help you with any work you need</div>
     </div>
     <input type="text" id="userInput" placeholder="Ask me something...">
     <button onclick="sendMessage()">Send</button>
-    <div class="instructions">
+    <button onclick="toggleInstructions()">Show Features</button>
+    <div class="instructions" id="instructions">
         <h3>How to Use Lemon AI</h3>
         <p>For Wikipedia search, type: <b>wikipedia [your topic]</b></p>
         <p>For math, enter an expression like: <b>5+7*3</b></p>
@@ -73,64 +76,9 @@
 </div>
 
 <script>
-    async function searchWikipedia(query) {
-        try {
-            let response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
-            let data = await response.json();
-            if (data.extract) {
-                return `${data.extract} <br><a href='${data.content_urls.desktop.page}' target='_blank'>Read more on Wikipedia</a>`;
-            } else {
-                return "I couldn't find anything on Wikipedia.";
-            }
-        } catch (error) {
-            return "Sorry, I had trouble getting information from Wikipedia.";
-        }
-    }
-
-    function calculateMath(expression) {
-        try {
-            if (/[^0-9+\-*/(). ]/.test(expression)) {
-                return "Invalid math expression.";
-            }
-            let result = Function(`'use strict'; return (${expression})`)();
-            return `The answer is: ${result}`;
-        } catch {
-            return "I couldn't calculate that. Try something simple like '5+7*3'.";
-        }
-    }
-
-    function searchGoogle(query) {
-        let searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-        return `Click <a href='${searchUrl}' target='_blank'>here</a> to search Google for '${query}'.`;
-    }
-
-    async function getResponse(userMessage) {
-        if (/^search\s+(.+)/i.test(userMessage)) {
-            let searchQuery = userMessage.match(/^search\s+(.+)/i)[1];
-            return searchGoogle(searchQuery);
-        } else if (/^wikipedia\s+(.+)/i.test(userMessage)) {
-            let wikiQuery = userMessage.match(/^wikipedia\s+(.+)/i)[1];
-            return await searchWikipedia(wikiQuery);
-        } else if (/^[0-9+\-*/(). ]+$/.test(userMessage)) {
-            return calculateMath(userMessage);
-        }
-        return "I can help with Wikipedia, math, and Google searches. Try asking in a different way!";
-    }
-
-    async function sendMessage() {
-        let inputField = document.getElementById("userInput");
-        let chatBox = document.getElementById("chatBox");
-        let userMessage = inputField.value.trim();
-
-        if (userMessage === "") return;
-
-        chatBox.innerHTML += `<div class='user'>You: ${userMessage}</div>`;
-
-        let botResponse = await getResponse(userMessage);
-        chatBox.innerHTML += `<div class='bot'>Lemon AI: ${botResponse}</div>`;
-
-        inputField.value = "";
-        chatBox.scrollTop = chatBox.scrollHeight;
+    function toggleInstructions() {
+        let instructions = document.getElementById("instructions");
+        instructions.style.display = instructions.style.display === "none" ? "block" : "none";
     }
 </script>
 
