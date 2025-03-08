@@ -8,7 +8,7 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            background-color: #f9f2a2;
+            background: linear-gradient(to bottom, #f9f2a2, #f5e1a4);
             margin: 0;
             padding: 20px;
         }
@@ -28,13 +28,21 @@
             background: #eafbfc;
             text-align: left;
         }
-        .user, .bot {
+        .user {
+            background: #ffad60;
+            color: #000;
+            text-align: right;
             padding: 8px;
             margin: 5px;
             border-radius: 5px;
         }
-        .user { background: #fecb7d; text-align: right; }
-        .bot { background: #feef3e; }
+        .bot {
+            background: #ffea70;
+            color: #000;
+            padding: 8px;
+            margin: 5px;
+            border-radius: 5px;
+        }
         input, button {
             padding: 10px;
             margin: 10px;
@@ -42,12 +50,15 @@
         }
         button {
             cursor: pointer;
-            background: #fbe385;
+            background: #4a90e2;
+            color: white;
             border: none;
             border-radius: 5px;
             transition: 0.3s;
         }
-        button:hover { background: #f9dd72; }
+        button:hover {
+            background: #357ac7;
+        }
         .instructions {
             background: #ffdb4d;
             padding: 10px;
@@ -76,7 +87,6 @@
         <p>For unit conversion, type: <b>convert [value] [unit] to [unit]</b></p>
         <p>For dictionary, type: <b>define [word]</b></p>
         <p>For jokes, type: <b>tell me a joke</b></p>
-        <p>For coding help, type: <b>code [language] [topic]</b> (e.g., code python loops)</p>
     </div>
 </div>
 
@@ -124,20 +134,6 @@
         return `${data.setup} - ${data.punchline}`;
     }
 
-    function getCodeSnippet(language, topic) {
-        const snippets = {
-            python: {
-                loops: "Python Loops:\nfor i in range(5):\n    print(i)",
-                functions: "Python Function:\ndef greet(name):\n    return f'Hello, {name}!'",
-            },
-            javascript: {
-                arrays: "JavaScript Arrays:\nlet fruits = ['apple', 'banana', 'cherry'];\nconsole.log(fruits);",
-                functions: "JavaScript Function:\nfunction greet(name) {\n    return `Hello, ${name}!`;\n}"
-            }
-        };
-        return snippets[language]?.[topic] || "I don't have an example for that yet.";
-    }
-
     async function sendMessage() {
         let inputField = document.getElementById("userInput");
         let chatBox = document.getElementById("chatBox");
@@ -160,12 +156,9 @@
             botResponse = await fetchDefinition(userMessage.substring(7));
         } else if (userMessage.toLowerCase().startsWith("tell me a joke")) {
             botResponse = await fetchJoke();
-        } else if (userMessage.toLowerCase().startsWith("code ")) {
-            let parts = userMessage.split(" ");
-            botResponse = getCodeSnippet(parts[1], parts[2]);
         }
 
-        chatBox.innerHTML += `<div class='bot'>LumenAI: ${botResponse}</div>`;
+        chatBox.innerHTML += `<div class='bot'>Lumen AI: ${botResponse}</div>`;
         inputField.value = "";
         chatBox.scrollTop = chatBox.scrollHeight;
     }
