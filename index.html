@@ -76,6 +76,7 @@
         <p>For unit conversion, type: <b>convert [value] [unit] to [unit]</b></p>
         <p>For dictionary, type: <b>define [word]</b></p>
         <p>For jokes, type: <b>tell me a joke</b></p>
+        <p>For coding help, type: <b>code [language] [topic]</b> (e.g., code python loops)</p>
     </div>
 </div>
 
@@ -123,6 +124,20 @@
         return `${data.setup} - ${data.punchline}`;
     }
 
+    function getCodeSnippet(language, topic) {
+        const snippets = {
+            python: {
+                loops: "Python Loops:\nfor i in range(5):\n    print(i)",
+                functions: "Python Function:\ndef greet(name):\n    return f'Hello, {name}!'",
+            },
+            javascript: {
+                arrays: "JavaScript Arrays:\nlet fruits = ['apple', 'banana', 'cherry'];\nconsole.log(fruits);",
+                functions: "JavaScript Function:\nfunction greet(name) {\n    return `Hello, ${name}!`;\n}"
+            }
+        };
+        return snippets[language]?.[topic] || "I don't have an example for that yet.";
+    }
+
     async function sendMessage() {
         let inputField = document.getElementById("userInput");
         let chatBox = document.getElementById("chatBox");
@@ -145,6 +160,9 @@
             botResponse = await fetchDefinition(userMessage.substring(7));
         } else if (userMessage.toLowerCase().startsWith("tell me a joke")) {
             botResponse = await fetchJoke();
+        } else if (userMessage.toLowerCase().startsWith("code ")) {
+            let parts = userMessage.split(" ");
+            botResponse = getCodeSnippet(parts[1], parts[2]);
         }
 
         chatBox.innerHTML += `<div class='bot'>LumenAI: ${botResponse}</div>`;
