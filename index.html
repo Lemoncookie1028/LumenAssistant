@@ -65,8 +65,8 @@
 </div>
 
 <script>
-    const API_KEY = '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'; // Replace with your Hugging Face API key
-    const API_URL = 'https://api-inference.huggingface.co/models/distilbert-base-uncased'; // Example model
+    // Securely handle the API key on the server side in a real app
+    const API_URL = 'https://api-inference.huggingface.co/models/gpt2'; // Use a model like GPT-2 for chatting
 
     // Function to send message and interact with the bot
     async function sendMessage() {
@@ -78,7 +78,7 @@
 
         // Display user message in chatbox
         chatBox.innerHTML += `<div class='user'>You: ${userMessage}</div>`;
-        
+
         // Call Hugging Face API for AI responses
         let botResponse = await getAIResponse(userMessage);
 
@@ -95,11 +95,11 @@
                 inputs: query,
             }, {
                 headers: {
-                    'Authorization': `Bearer ${API_KEY}`
+                    'Authorization': `Bearer ${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}` // Make sure to use the key securely
                 }
             });
 
-            return response.data[0].generated_text || "Sorry, I couldn't understand that.";
+            return response.data[0]?.generated_text || "Sorry, I couldn't understand that.";
         } catch (error) {
             console.error("Error calling Hugging Face API:", error);
             return "Sorry, there was an error processing your request.";
