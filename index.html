@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌟LumenAssistant - School & Research Helper🌟</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
+        /* Styling for the chat interface */
         body {
             font-family: Arial, sans-serif;
             text-align: center;
@@ -50,13 +51,6 @@
             transition: 0.3s;
         }
         button:hover { background: #357ac7; }
-        .instructions {
-            background: #ffdb4d;
-            padding: 10px;
-            margin: 10px;
-            border-radius: 5px;
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -68,74 +62,13 @@
     </div>
     <input type="text" id="userInput" placeholder="Ask me something...">
     <button onclick="sendMessage()">Send</button>
-    <button onclick="toggleInstructions()">Show Features</button>
-    <div class="instructions" id="instructions">
-        <h3>How to Use LumenAssistant</h3>
-        <p>For Wikipedia search, type: <b>wikipedia [your topic]</b></p>
-        <p>For Google search, type: <b>search [your query]</b></p>
-        <p>For image search, type: <b>image [your query]</b></p>
-        <p>For math, enter an expression like: <b>5+7*3</b></p>
-        <p>For weather, type: <b>weather [city]</b></p>
-        <p>For unit conversion, type: <b>convert [value] [unit] to [unit]</b></p>
-        <p>For dictionary, type: <b>define [word]</b></p>
-        <p>For jokes, type: <b>tell me a joke</b></p>
-        <p>For MC, type: <b>MC</b></p>
-        <p>For Bypass Hub, type: <b>bypass</b></p>
-    </div>
 </div>
 
 <script>
-    function toggleInstructions() {
-        let instructions = document.getElementById("instructions");
-        instructions.style.display = instructions.style.display === "none" ? "block" : "none";
-    }
+    const API_KEY = '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'; // Replace with your Hugging Face API key
+    const API_URL = 'https://api-inference.huggingface.co/models/distilbert-base-uncased'; // Example model
 
-    async function fetchWikipedia(query) {
-        try {
-            let response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${query}`);
-            let data = await response.json();
-            return data.extract ? `${data.title}: ${data.extract}` : "No Wikipedia article found.";
-        } catch (error) {
-            return "Error fetching Wikipedia data.";
-        }
-    }
-
-    async function fetchWeather(city) {
-        let response = await fetch(`https://wttr.in/${city}?format=%C+%t`);
-        let data = await response.text();
-        return `Weather in ${city}: ${data}`;
-    }
-
-    async function fetchDictionary(word) {
-        let response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-        let data = await response.json();
-        return data[0]?.meanings[0]?.definitions[0]?.definition || "No definition found.";
-    }
-
-    async function fetchJoke() {
-        let response = await fetch("https://v2.jokeapi.dev/joke/Any");
-        let data = await response.json();
-        return data.type === "twopart" ? `${data.setup} ${data.delivery}` : data.joke;
-    }
-
-    function performGoogleSearch(query) {
-        window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
-        return "Opening Google search...";
-    }
-    
-    function performImageSearch(query) {
-        window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query)}`, '_blank');
-        return "Opening image search...";
-    }
-
-    function calculateMath(expression) {
-        try {
-            return `The answer is: ${math.evaluate(expression)}`;
-        } catch {
-            return "I couldn't calculate that. Try something simple like '5 + 3'.";
-        }
-    }
-
+    // Function to send message and interact with the bot
     async function sendMessage() {
         let inputField = document.getElementById("userInput");
         let chatBox = document.getElementById("chatBox");
@@ -143,33 +76,36 @@
 
         if (userMessage === "") return;
 
+        // Display user message in chatbox
         chatBox.innerHTML += `<div class='user'>You: ${userMessage}</div>`;
-        let botResponse = "I didn't understand that.";
+        
+        // Call Hugging Face API for AI responses
+        let botResponse = await getAIResponse(userMessage);
 
-        if (userMessage.toLowerCase().startsWith("wikipedia ")) {
-            botResponse = await fetchWikipedia(userMessage.substring(10));
-        } else if (userMessage.toLowerCase().startsWith("search ")) {
-            botResponse = performGoogleSearch(userMessage.substring(7));
-        } else if (userMessage.toLowerCase().startsWith("image ")) {
-            botResponse = performImageSearch(userMessage.substring(6));
-        } else if (userMessage.toLowerCase().startsWith("weather ")) {
-            botResponse = await fetchWeather(userMessage.substring(8));
-        } else if (userMessage.toLowerCase().startsWith("define ")) {
-            botResponse = await fetchDictionary(userMessage.substring(7));
-        } else if (userMessage.toLowerCase() === "tell me a joke") {
-            botResponse = await fetchJoke();
-        } else if (/^[0-9+\-*/(). ]+$/.test(userMessage)) {
-            botResponse = calculateMath(userMessage);
-        }
-
-        chatBox.innerHTML += `<div class='bot'>Lumen AI: ${botResponse}</div>`;
+        // Display AI response in chatbox
+        chatBox.innerHTML += `<div class='bot'>Lumen Assistant: ${botResponse}</div>`;
         inputField.value = "";
         chatBox.scrollTop = chatBox.scrollHeight;
     }
+
+    // Fetch AI response from Hugging Face model
+    async function getAIResponse(query) {
+        try {
+            const response = await axios.post(API_URL, {
+                inputs: query,
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${API_KEY}`
+                }
+            });
+
+            return response.data[0].generated_text || "Sorry, I couldn't understand that.";
+        } catch (error) {
+            console.error("Error calling Hugging Face API:", error);
+            return "Sorry, there was an error processing your request.";
+        }
+    }
 </script>
 
-<footer>
-    <p>&copy; 2025 RuinWeb. All rights reserved.</p>
-</footer>
 </body>
 </html>
