@@ -6,7 +6,87 @@
     <title>🌟LumenAssistant - School & Research Helper🌟</title>
     <style>
         body {
+            font-family: Arial, sans-serif;<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌟LumenAssistant - School & Research Helper🌟</title>
+    <style>
+        body {
             font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(to bottom, #f9f2a2, #f5e1a4);
+            margin: 0;
+            padding: 20px;
+        }
+        .chat-container {
+            max-width: 400px;
+            margin: 20px auto;
+            background: #caeefb;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        .chat-box {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background: #eafbfc;
+            text-align: left;
+        }
+        .user, .bot {
+            padding: 8px;
+            margin: 5px;
+            border-radius: 5px;
+        }
+        .user { background: #ffad60; text-align: right; }
+        .bot { background: #ffea70; }
+        input, button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+        }
+        button {
+            cursor: pointer;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        button:hover { background: #357ac7; }
+        .instructions {
+            background: #ffdb4d;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <h2>🌟 LumenAssistant - School & Research Helper 🌟</h2>
+    <div class="chat-box" id="chatBox">
+        <div class="bot">Hello! I'm LumenAssistant. How can I help?</div>
+    </div>
+    <input type="text" id="userInput" placeholder="Ask me something...">
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="toggleInstructions()">Show Features</button>
+    <div class="instructions" id="instructions">
+        <h3>How to Use LumenAssistant</h3>
+        <p>For Wikipedia search, type: <b>wikipedia [your topic]</b></p>
+        <p>For Google search, type: <b>search [your query]</b></p>
+        <p>For image search, type: <b>image [your query]</b></p>
+        <p>For math, enter an expression like: <b>5+7*3</b></p>
+        <p>For weather, type: <b>weather [city]</b></p>
+        <p>For unit conversion, type: <b>convert [value] [unit] to [unit]</b></p>
+        <p>For dictionary, type: <b>define [word]</b></p>
+        <p>For jokes, type: <
+
             text-align: center;
             background: linear-gradient(to bottom, #f9f2a2, #f5e1a4);
             margin: 0;
