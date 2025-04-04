@@ -1,1 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌟LumenAssistant - School & Research Helper🌟</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        /* Styling for the chat interface */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(to bottom, #f9f2a2, #f5e1a4);
+            margin: 0;
+            padding: 20px;
+        }
+        .chat-container {
+            max-width: 400px;
+            margin: 20px auto;
+            background: #caeefb;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        .chat-box {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background: #eafbfc;
+            text-align: left;
+        }
+        .user, .bot {
+            padding: 8px;
+            margin: 5px;
+            border-radius: 5px;
+        }
+        .user { background: #ffad60; text-align: right; }
+        .bot { background: #ffea70; }
+        input, button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+        }
+        button {
+            cursor: pointer;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        button:hover { background: #357ac7; }
+    </style>
+</head>
+<body>
 
+<div class="chat-container">
+    <h2>🌟 LumenAssistant - School & Research Helper 🌟</h2>
+    <div class="chat-box" id="chatBox">
+        <div class="bot">Hello! I'm LumenAssistant. How can I help?</div>
+    </div>
+    <input type="text" id="userInput" placeholder="Ask me something...">
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+    const API_KEY = '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'; // Replace with your Hugging Face API key
+    const API_URL = 'https://api-inference.huggingface.co/models/distilbert-base-uncased'; // Example model
+
+    // Function to send message and interact with the bot
+    async function sendMessage() {
+        let inputField = document.getElementById("userInput");
+        let chatBox = document.getElementById("chatBox");
+        let userMessage = inputField.value.trim();
+
+        if (userMessage === "") return;
+
+        // Display user message in chatbox
+        chatBox.innerHTML += `<div class='user'>You: ${userMessage}</div>`;
+        
+        // Call Hugging Face API for AI responses
+        let botResponse = await getAIResponse(userMessage);
+
+        // Display AI response in chatbox
+        chatBox.innerHTML += `<div class='bot'>Lumen Assistant: ${botResponse}</div>`;
+        inputField.value = "";
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Fetch AI response from Hugging Face model
+    async function getAIResponse(query) {
+        try {
+            const response = await axios.post(API_URL, {
+                inputs: query,
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${API_KEY}`
+                }
+            });
+
+            return response.data[0].generated_text || "Sorry, I couldn't understand that.";
+        } catch (error) {
+            console.error("Error calling Hugging Face API:", error);
+            return "Sorry, there was an error processing your request.";
+        }
+    }
+</script>
+
+</body>
+</html>
